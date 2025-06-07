@@ -1,13 +1,15 @@
 Project Management API - Backend
 
 Features - 
+
 User Authentication: Secure user registration and login using JSON Web Tokens (JWT).
 Password Hashing: Passwords are securely hashed using bcrypt before being stored.
 Protected Routes: Middleware to protect sensitive endpoints, ensuring only authenticated users can access them.
-User & Preferences API: Endpoints to manage user profile data and personal preferences (e.g., theme, layout).
-Input Validation: Server-side validation of incoming data using Joi.
+
+
 
 Tech Stack - 
+
 Runtime Environment: Node.js
 Framework: Express.js
 Database: MongoDB with Mongoose ODM
