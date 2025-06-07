@@ -1,9 +1,9 @@
-const mognoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const User = require("../models/user.models.js");
-const asyncHandler = require("../utils/asyncHandler.js");
-const ApiError = require("../utils/ApiError.js");   
+import { asyncHandler } from "../utils/asyncHandler.js";
+import {ApiError} from "../utils/ApiError.js"
+import { User} from "../models/user.models.js"
+import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken"
+import mongoose from "mongoose"; 
 
 
 const generateAccessAndRefereshTokens = async(userId) =>{
@@ -26,16 +26,16 @@ const generateAccessAndRefereshTokens = async(userId) =>{
 const registerUser = asyncHandler( async (req, res) => {
 
 
-    const {fullName, email, username, password } = req.body
+    const {fullName, email, password } = req.body
 
     if (
-        [fullName, email, username, password].some((field) => field?.trim() === "")  
+        [fullName, email, password].some((field) => field?.trim() === "")  
     ) {
         throw new ApiError(400, "All fields are required")
     }
 
     const existedUser = await User.findOne({
-        $or: [{ username }, { email }]
+        $or: [{ fullName }, { email }]
     })
 
     if (existedUser) {
@@ -70,10 +70,10 @@ const registerUser = asyncHandler( async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) =>{
 
-    const {email, username, password} = req.body
+    const {email, fullName, password} = req.body
     console.log(email);
 
-    if (!username && !email) {
+    if (!fullName && !email) {
         throw new ApiError(400, "username or email is required")
     }
     if (!password || password.trim() === "") {
@@ -81,7 +81,7 @@ const loginUser = asyncHandler(async (req, res) =>{
     }
 
     const user = await User.findOne({
-        $or: [{username}, {email}] 
+        $or: [{fullName}, {email}] 
     })
 
     if (!user) {
@@ -144,8 +144,40 @@ const logoutUser = asyncHandler(async(req, res) => {
     .json(new ApiResponse(200, {}, "User logged Out"))
 })
 
+const changeCurrentPassword = asyncHandler(async(req, res) => {
+    const {oldPassword, newPassword} = req.body
+
+    
+
+    const user = await User.findById(req.user?._id)
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+
+    if (!isPasswordCorrect) {
+        throw new ApiError(400, "Invalid old password")
+    }
+
+    user.password = newPassword
+    await user.save({validateBeforeSave: false})
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password changed successfully"))
+})
+
+const getCurrentUser = asyncHandler(async(req, res) => {
+    return res
+    .status(200)
+    .json(new ApiResponse(
+        200,
+        req.user,
+        "User fetched successfully"
+    ))
+})
+
 export {
     registerUser,
     loginUser,
-    logoutUser,   
+    logoutUser, 
+    getCurrentUser,
+    changeCurrentPassword  
 }

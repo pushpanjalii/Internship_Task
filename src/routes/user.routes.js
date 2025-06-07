@@ -2,20 +2,22 @@ import { Router } from "express";
 import { 
     loginUser, 
     logoutUser, 
-    registerUser
+    registerUser,
+    changeCurrentPassword,
+    getCurrentUser
 } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 
-const router = Router()
+const userRouter = Router(); 
 
-router.route("/register").post(
-    registerUser
-    )
-
-router.route("/login").post(loginUser)
-
-router.route("/logout").post(verifyJWT,  logoutUser)
+userRouter.route("/register").post(registerUser);
+userRouter.route("/login").post(loginUser);
+userRouter.route("/logout").post(verifyJWT, logoutUser);
+userRouter.route("/change-password").post(verifyJWT, changeCurrentPassword);
+userRouter.route("/current-user").get(verifyJWT, getCurrentUser);
 
 
-export default router
+
+
+export default userRouter;
